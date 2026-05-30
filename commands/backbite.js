@@ -13,18 +13,27 @@ module.exports = {
         const content = interaction.options.getString('내용');
         const guild = interaction.guild; // 명령어가 사용된 디스코드 서버
 
-        // 유저에게는 비밀 메시지로 먼저 전송 완료 알림 보내기 (익명 보장)
-        await interaction.reply({ content: '🤫 익명 제보가 안전하게 전송되었습니다!', ephemeral: true });
+        // 1. 유저에게 비밀 메시지로 먼저 알림을 보내고, 그 메시지를 변수(reply)에 저장
+        const reply = await interaction.reply({ content: '🤫 익명 제보가 안전하게 전송되었습니다!', ephemeral: true });
 
-        // [해결 키포인트] 봇의 임시 기억(캐시) 대신, 디스코드 서버에서 실시간 채널 목록을 진짜로 받아와서 검사!
+        // ⏱️ [핵심 기능] 3초(3000ms) 뒤에 나한테만 보이던 완료 알림을 자동으로 삭제하기
+        setTimeout(async () => {
+            try {
+                await interaction.deleteReply();
+            } catch (error) {
+                console.error('알림 자동 삭제 중 에러 발생:', error);
+            }
+        }, 3000); // 3000은 3초를 뜻해! 만약 5초로 하고 싶다면 5000으로 바꾸면 돼.
+
+        // 실시간 채널 목록 fetch (채널 이름 검색과 생성을 'Open Claw-뒷담방'으로 통일했어!)
         const channels = await guild.channels.fetch();
-        let targetChannel = channels.find(ch => ch.name === '익명-뒷담방' && ch.type === ChannelType.GuildText);
+        let targetChannel = channels.find(ch => ch.name === 'open-claw-뒷담방' && ch.type === ChannelType.GuildText);
 
-        // 서버 전체를 통틀어 '익명-뒷담방'이 진짜로 존재하지 않을 때만 딱 한 번만 새로 생성
+        // 서버 전체를 통틀어 채널이 진짜로 존재하지 않을 때만 딱 한 번만 새로 생성
         if (!targetChannel) {
             try {
                 targetChannel = await guild.channels.create({
-                    name: 'Open Claw-뒷담방',
+                    name: 'open-claw-뒷담방',
                     type: ChannelType.GuildText,
                     topic: 'Open Claw-뒷담방입니다. 자유롭게 즐겨보세요!',
                     permissionOverwrites: [
@@ -44,7 +53,7 @@ module.exports = {
             }
         }
 
-        // 익명 박스(임베드) 꾸미기
+        // 만능 회색(#72767d) 익명 박스(임베드) 꾸미기
         const anonymousEmbed = new EmbedBuilder()
             .setColor('#72767d')
             .setTitle('익명 뒷담 메시지')
@@ -52,7 +61,7 @@ module.exports = {
             .setTimestamp()
             .setFooter({ text: '범인은 근처에?' });
 
-        // 실시간으로 찾아냈거나 새로 개설한 '익명-뒷담방' 채널에 최종 전송
+        // 최종 전송
         await targetChannel.send({ embeds: [anonymousEmbed] });
     },
 };

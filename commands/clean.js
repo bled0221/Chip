@@ -22,12 +22,36 @@ module.exports = {
         }
 
         try {
+            // 봇이 생각 중인 상태로 만들기 (나한테만 보이게)
             await interaction.deferReply({ ephemeral: true });
+            
+            // 대량 삭제 실행
             const deletedMessages = await interaction.channel.bulkDelete(amount, true);
+            
+            // 삭제 완료 메시지로 업데이트
             await interaction.editReply({ content: `✨ 성공적으로 ${deletedMessages.size}개의 메시지를 청소했습니다!` });
+
+            // ⏱️ [핵심 기능] 청소 완료 알림도 3초(3000ms) 뒤에 자동으로 흔적 없이 지우기!
+            setTimeout(async () => {
+                try {
+                    await interaction.deleteReply();
+                } catch (error) {
+                    console.error('청소 알림 자동 삭제 중 에러 발생:', error);
+                }
+            }, 3000);
+
         } catch (error) {
             console.error(error);
+            // 에러가 났을 때도 메시지를 띄워주고 똑같이 3초 뒤에 지워줄게!
             await interaction.editReply({ content: '❌ 메시지를 청소하는 중에 오류가 발생했습니다. (2주가 지난 메시지는 지울 수 없어요!)' });
+            
+            setTimeout(async () => {
+                try {
+                    await interaction.deleteReply();
+                } catch (error) {
+                    console.error('에러 알림 자동 삭제 중 에러 발생:', error);
+                }
+            }, 3000);
         }
     },
 };
