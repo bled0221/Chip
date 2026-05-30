@@ -18,10 +18,13 @@ module.exports = {
     async execute(interaction) {
         // [체크 1] 명령어를 쓴 사람에게 권한이 있는지 확인
         if (!interaction.member.permissions.has('KickMembers')) {
-            return interaction.reply({ 
+            await interaction.reply({ 
                 content: '❌ 당신은 권한이 없습니다! (멤버 추방 권한이 필요합니다)', 
-                ephemeral: true 
+                ephemeral: true // 🤫 쓴 사람한테만 보임
             });
+            // ⏰ 3초 후 비밀 메시지 삭제
+            setTimeout(() => interaction.deleteReply().catch(console.error), 3000);
+            return;
         }
 
         const targetMember = interaction.options.getMember('멤버');
@@ -29,15 +32,24 @@ module.exports = {
 
         // 유저가 서버에 없는 경우
         if (!targetMember) {
-            return interaction.reply({ content: '❌ 서버에서 해당 멤버를 찾을 수 없습니다.', ephemeral: true });
+            await interaction.reply({ 
+                content: '❌ 서버에서 해당 멤버를 찾을 수 없습니다.', 
+                ephemeral: true 
+            });
+            // ⏰ 3초 후 비밀 메시지 삭제
+            setTimeout(() => interaction.deleteReply().catch(console.error), 3000);
+            return;
         }
 
         // 봇보다 권한이 높으면 추방 불가
         if (!targetMember.kickable) {
-            return interaction.reply({ 
+            await interaction.reply({ 
                 content: '❌ Open Claw 의 권한이 부족하여 이 멤버를 추방할 수 없습니다. (서버 설정에서 Open Claw 의 역할 순위를 더 올려주세요!)', 
                 ephemeral: true 
             });
+            // ⏰ 5초 후 비밀 메시지 삭제
+            setTimeout(() => interaction.deleteReply().catch(console.error), 5000);
+            return;
         }
 
         try {
@@ -49,13 +61,13 @@ module.exports = {
                     await targetMember.send(`✉️ **${interaction.guild.name}** 서버에서 추방당하셨습니다.`);
                 }
             } catch (dmError) {
-                // 🤫 DM이 막혀있어도 콘솔 로그 안 남기고, 아무 일 없었다는 듯 조용히 패스!
+                // DM 막혀있으면 패스
             }
 
             // 💡 진짜로 서버에서 추방하기
             await targetMember.kick(reason);
 
-            // 📢 채팅방에 보여줄 성공 메시지
+            // 📢 채팅방에 보여줄 성공 메시지 (이건 모두가 봐야 하니까 ephemeral 없음, 영구 유지)
             if (reason) {
                 await interaction.reply({ 
                     content: `👋 **${targetMember.user.tag}** 님이 서버에서 추방되었습니다.\n📄 **사유:** ${reason}` 
@@ -68,7 +80,12 @@ module.exports = {
 
         } catch (error) {
             console.error(error);
-            await interaction.reply({ content: '❌ 오류가 발생했습니다.', ephemeral: true });
+            await interaction.reply({ 
+                content: '❌ 오류가 발생했습니다.', 
+                ephemeral: true 
+            });
+            // ⏰ 3초 후 비밀 메시지 삭제
+            setTimeout(() => interaction.deleteReply().catch(console.error), 3000);
         }
     },
 };
