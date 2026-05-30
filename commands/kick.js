@@ -44,11 +44,11 @@ module.exports = {
         // 🛡️ [추가 예외 처리] 만약 추방하려는 대상이 봇 자신(Open Claw)일 경우
         if (targetMember.id === interaction.client.user.id) {
             await interaction.reply({ 
-                content: '저를 추방할 수는 없습니다! 제가 마음에 안 드시나요..? 🥺', 
+                content: '저를 추방할 수는 없습니다! 혹시 제가 마음에 안 드시나요..? 🥺', 
                 ephemeral: true 
             });
-            // ⏰ 3초 후 비밀 메시지 삭제
-            setTimeout(() => interaction.deleteReply().catch(console.error), 3000);
+            // ⏰ 5초 후 비밀 메시지 삭제
+            setTimeout(() => interaction.deleteReply().catch(console.error), 5000);
             return;
         }
 
