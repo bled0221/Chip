@@ -46,7 +46,7 @@ module.exports = {
 
         // 익명 박스(임베드) 꾸미기
         const anonymousEmbed = new EmbedBuilder()
-            .setColor('#2b2d31')
+            .setColor('#Default')
             .setTitle('익명 뒷담 메시지')
             .setDescription(`"${content}"`)
             .setTimestamp()
