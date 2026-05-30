@@ -24,7 +24,7 @@ module.exports = {
         if (!targetChannel) {
             try {
                 targetChannel = await guild.channels.create({
-                    name: '익명-뒷담방',
+                    name: 'Open Claw-뒷담방',
                     type: ChannelType.GuildText,
                     topic: 'Open Claw-뒷담방입니다. 자유롭게 즐겨보세요!',
                     permissionOverwrites: [
@@ -46,8 +46,8 @@ module.exports = {
 
         // 익명 박스(임베드) 꾸미기
         const anonymousEmbed = new EmbedBuilder()
-            .setColor('#fc9700')
-            .setTitle('🤫 익명 뒷담 메시지')
+            .setColor('#2b2d31')
+            .setTitle('익명 뒷담 메시지')
             .setDescription(`"${content}"`)
             .setTimestamp()
             .setFooter({ text: '범인은 근처에?' });
