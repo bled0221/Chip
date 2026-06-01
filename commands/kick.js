@@ -21,7 +21,7 @@ module.exports = {
         if (!interaction.member.permissions.has(PermissionFlagsBits.KickMembers)) {
             await interaction.reply({ 
                 content: '❌ 당신은 권한이 없습니다! (멤버 추방 권한이 필요합니다)', 
-                flags: MessageFlags.Ephemeral // 최신 디스코드 버전에 맞춘 비밀 메시지 플래그
+                flags: MessageFlags.Ephemeral 
             });
             setTimeout(() => interaction.deleteReply().catch(console.error), 3000);
             return;
@@ -55,12 +55,15 @@ module.exports = {
         }
 
         try {
-            // 💡 1. 추방당한 사람에게 보낼 DM 임베드 생성
+            // 💡 1. 추방당한 사람에게 보낼 DM 임베드 생성 (누가 추방했는지 포함)
             const dmEmbed = new EmbedBuilder()
                 .setColor('#72767d')
                 .setTitle(`[${interaction.guild.name}] 서버 추방 안내`)
                 .setDescription(`**${targetMember.user.username}**님은 **${interaction.guild.name}** 에서 추방 처리되었음을 알려드립니다.`)
-                .addFields({ name: '사유', value: reason })
+                .addFields(
+                    { name: '사유', value: reason, inline: false },
+                    { name: '담당 관리자', value: `${interaction.user.tag} (${interaction.user.id})`, inline: false }
+                )
                 .setTimestamp();
 
             // DM 발송 시도
@@ -73,7 +76,7 @@ module.exports = {
             // 💡 2. 진짜로 서버에서 유저 추방하기
             await targetMember.kick(reason);
 
-            // 💡 3. 서버 채팅방에 보여줄 성공 임베드 생성 (네 피드백대로 프사 지움!)
+            // 💡 3. 서버 채팅방에 보여줄 성공 임베드 생성
             const successEmbed = new EmbedBuilder()
                 .setColor('#72767d')
                 .setTitle('멤버 추방 완료')
@@ -83,10 +86,9 @@ module.exports = {
                     { name: '담당 관리자', value: `<@${interaction.user.id}>`, inline: true },
                     { name: '사유', value: reason, inline: false }
                 )
-                // ✂️ 깔끔한 레이아웃을 위해 .setThumbnail 줄을 완전히 제거했습니다!
                 .setTimestamp();
 
-            // 💡 대기 상태를 끝마치며 서버 채널에 성공 임베드 쾅 박아주기
+            // 💡 대기 상태를 끝마치며 성공 임베드 출력
             await interaction.editReply({ content: '', embeds: [successEmbed] });
 
         } catch (error) {
