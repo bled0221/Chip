@@ -4,7 +4,7 @@ const { SlashCommandBuilder, EmbedBuilder, time } = require('discord.js');
 module.exports = {
     // 1. 디스코드 명령어 설정
     data: new SlashCommandBuilder()
-        .setName('개인정보')
+        .setName('유저')
         .setDescription('선택한 유저의 프로필 정보를 확인합니다.')
         .addUserOption(option => 
             option.setName('멤버')
