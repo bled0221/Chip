@@ -1,10 +1,11 @@
-const { SlashCommandBuilder } = require('discord.js');
+// commands/kick.js
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 
 module.exports = {
-    // 1. 디스코드 명령어 설정
+    // 1. 디스코드 슬래시 명령어 설정
     data: new SlashCommandBuilder()
         .setName('추방')
-        .setDescription('서버에서 특정 멤버를 추방합니다. (추방 안내와 사유가 추방된 멤버에게 Dm으로 전달됩니다.)')
+        .setDescription('서버에서 특정 멤버를 추방합니다. (추방 안내와 사유가 추방된 멤버에게 DM으로 전달됩니다.)')
         .addUserOption(option => 
             option.setName('멤버')
                 .setDescription('추방할 멤버를 선택하세요.')
@@ -16,86 +17,81 @@ module.exports = {
 
     // 2. 명령어 실행 코드
     async execute(interaction) {
-        // [체크 1] 명령어를 쓴 사람에게 권한이 있는지 확인
-        if (!interaction.member.permissions.has('KickMembers')) {
+        // [체크 1] 명령어를 쓴 관리자에게 추방 권한이 있는지 확인
+        if (!interaction.member.permissions.has(PermissionFlagsBits.KickMembers)) {
             await interaction.reply({ 
                 content: '❌ 당신은 권한이 없습니다! (멤버 추방 권한이 필요합니다)', 
-                ephemeral: true 
+                flags: MessageFlags.Ephemeral // 최신 디스코드 버전에 맞춘 비밀 메시지 플래그
             });
-            // ⏰ 3초 후 비밀 메시지 삭제
             setTimeout(() => interaction.deleteReply().catch(console.error), 3000);
             return;
         }
+
+        // ⏱️ [생각 시간 확보] DM 발송 및 추방 처리에 시간이 걸리므로 디스코드와의 연결 유지
+        await interaction.deferReply();
 
         const targetMember = interaction.options.getMember('멤버');
-        const reason = interaction.options.getString('사유'); 
+        const reason = interaction.options.getString('사유') || '지정되지 않음'; 
 
-        // 유저가 서버에 없는 경우
+        // [체크 2] 유저가 서버에 없는 경우
         if (!targetMember) {
-            await interaction.reply({ 
-                content: '❌ 서버에서 해당 멤버를 찾을 수 없습니다.', 
-                ephemeral: true 
-            });
-            // ⏰ 3초 후 비밀 메시지 삭제
+            await interaction.editReply({ content: '❌ 서버에서 해당 멤버를 찾을 수 없습니다.' });
             setTimeout(() => interaction.deleteReply().catch(console.error), 3000);
             return;
         }
 
-        // 🛡️ [추가 예외 처리] 만약 추방하려는 대상이 봇 자신(Open Claw)일 경우
+        // [체크 3] 추방 대상이 봇 자신(Open Claw)일 경우
         if (targetMember.id === interaction.client.user.id) {
-            await interaction.reply({ 
-                content: '저를 추방할 수는 없습니다! 혹시 제가 마음에 안 드시나요..? 🥺', 
-                ephemeral: true 
-            });
-            // ⏰ 5초 후 비밀 메시지 삭제
+            await interaction.editReply({ content: '저를 추방할 수는 없습니다! 혹시 제가 마음에 안 드시나요..? 🥺' });
             setTimeout(() => interaction.deleteReply().catch(console.error), 5000);
             return;
         }
 
-        // 봇보다 권한이 높으면 추방 불가
+        // [체크 4] 대상이 봇보다 권한이 높아서 추방할 수 없는 경우
         if (!targetMember.kickable) {
-            await interaction.reply({ 
-                content: '❌ Open Claw 의 권한이 부족하여 이 멤버를 추방할 수 없습니다. (서버 설정에서 Open Claw 의 역할 순위를 더 올려주세요!)', 
-                ephemeral: true 
-            });
-            // ⏰ 5초 후 비밀 메시지 삭제
+            await interaction.editReply({ content: '❌ Open Claw의 권한이 부족하여 이 멤버를 추방할 수 없습니다. (서버 설정에서 Open Claw의 역할 순위를 더 올려주세요!)' });
             setTimeout(() => interaction.deleteReply().catch(console.error), 5000);
             return;
         }
 
         try {
-            // 💡 추방당하기 전에 유저에게 개인 메시지(DM) 보내기
+            // 💡 1. 추방당한 사람에게 보낼 DM 임베드 생성
+            const dmEmbed = new EmbedBuilder()
+                .setColor('#72767d')
+                .setTitle(`[${interaction.guild.name}] 서버 추방 안내`)
+                .setDescription(`**${targetMember.user.username}**님은 **${interaction.guild.name}** 에서 추방 처리되었음을 알려드립니다.`)
+                .addFields({ name: '사유', value: reason })
+                .setTimestamp();
+
+            // DM 발송 시도
             try {
-                if (reason) {
-                    await targetMember.send(`✉️ **${interaction.guild.name}** 서버에서 추방당하셨습니다.\n📄 **사유:** ${reason}`);
-                } else {
-                    await targetMember.send(`✉️ **${interaction.guild.name}** 서버에서 추방당하셨습니다.`);
-                }
+                await targetMember.send({ embeds: [dmEmbed] });
             } catch (dmError) {
-                // DM 막혀있으면 패스
+                // 유저가 DM을 막아둔 경우 조용히 패스
             }
 
-            // 💡 진짜로 서버에서 추방하기
+            // 💡 2. 진짜로 서버에서 유저 추방하기
             await targetMember.kick(reason);
 
-            // 📢 채팅방에 보여줄 성공 메시지
-            if (reason) {
-                await interaction.reply({ 
-                    content: `👋 **${targetMember.user.tag}** 님이 서버에서 추방되었습니다.\n📄 **사유:** ${reason}` 
-                });
-            } else {
-                await interaction.reply({ 
-                    content: `👋 **${targetMember.user.tag}** 님이 서버에서 추방되었습니다.` 
-                });
-            }
+            // 💡 3. 서버 채팅방에 보여줄 성공 임베드 생성 (네 피드백대로 프사 지움!)
+            const successEmbed = new EmbedBuilder()
+                .setColor('#72767d')
+                .setTitle('멤버 추방 완료')
+                .setDescription(`**${targetMember.user.tag}** 님이 서버에서 추방되었습니다.`)
+                .addFields(
+                    { name: '추방 대상', value: `<@${targetMember.id}>`, inline: true },
+                    { name: '담당 관리자', value: `<@${interaction.user.id}>`, inline: true },
+                    { name: '사유', value: reason, inline: false }
+                )
+                // ✂️ 깔끔한 레이아웃을 위해 .setThumbnail 줄을 완전히 제거했습니다!
+                .setTimestamp();
+
+            // 💡 대기 상태를 끝마치며 서버 채널에 성공 임베드 쾅 박아주기
+            await interaction.editReply({ content: '', embeds: [successEmbed] });
 
         } catch (error) {
             console.error(error);
-            await interaction.reply({ 
-                content: '❌ 오류가 발생했습니다.', 
-                ephemeral: true 
-            });
-            // ⏰ 3초 후 비밀 메시지 삭제
+            await interaction.editReply({ content: '❌ 추방 처리 중 알 수 없는 오류가 발생했습니다.' });
             setTimeout(() => interaction.deleteReply().catch(console.error), 3000);
         }
     },

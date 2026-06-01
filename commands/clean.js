@@ -2,7 +2,7 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 
 module.exports = {
-    // 1. 디플로이와 인덱스가 읽어갈 이 명령어의 메뉴판 정보
+    // 1. 목록에는 누구에게나 보이도록 숨김 설정(.setDefaultMemberPermissions)을 제거했어요!
     data: new SlashCommandBuilder()
         .setName('청소')
         .setDescription('채팅방의 메시지를 삭제합니다.')
@@ -10,11 +10,28 @@ module.exports = {
             option.setName('개수')
                 .setDescription('삭제할 메시지의 개수를 입력하세요 (1~100)')
                 .setRequired(true)
-        )
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages), // 관리자 제한
+        ),
 
     // 2. 실제로 작동할 청소 능력 알맹이
     async execute(interaction) {
+        // ⭐ [핵심 추가] 명령어를 친 사람이 '메시지 관리 권한'이 있는지 봇이 직접 확인해
+        if (!interaction.member.permissions.has(PermissionFlagsBits.ManageMessages)) {
+            // 권한이 없다면, '명령어 친 사람에게만 보이는' 경고 메시지를 띄워
+            await interaction.reply({ content: '⚠️ 이 명령어를 사용할 권한이 없습니다! (메시지 관리 권한 필요)', ephemeral: true });
+            
+            // ⏱️ 3초(3000ms) 후에 그 경고 메시지를 흔적 없이 지워
+            setTimeout(async () => {
+                try {
+                    await interaction.deleteReply();
+                } catch (error) {
+                    console.error('권한 경고 메시지 삭제 중 에러 발생:', error);
+                }
+            }, 3000);
+            
+            return; // 권한이 없으니 아래 청소 코드는 실행하지 않고 여기서 끝내기!
+        }
+
+        // --- 여기서부터는 권한이 있는 사람(관리자)만 넘어오는 청소 코드 ---
         const amount = interaction.options.getInteger('개수');
 
         if (amount < 1 || amount > 100) {
@@ -22,16 +39,12 @@ module.exports = {
         }
 
         try {
-            // 봇이 생각 중인 상태로 만들기 (나한테만 보이게)
             await interaction.deferReply({ ephemeral: true });
             
-            // 대량 삭제 실행
             const deletedMessages = await interaction.channel.bulkDelete(amount, true);
             
-            // 삭제 완료 메시지로 업데이트
             await interaction.editReply({ content: `✨ 성공적으로 ${deletedMessages.size}개의 메시지를 청소했습니다!` });
 
-            // ⏱️ [핵심 기능] 청소 완료 알림도 3초(3000ms) 뒤에 자동으로 흔적 없이 지우기!
             setTimeout(async () => {
                 try {
                     await interaction.deleteReply();
@@ -42,7 +55,6 @@ module.exports = {
 
         } catch (error) {
             console.error(error);
-            // 에러가 났을 때도 메시지를 띄워주고 똑같이 3초 뒤에 지워줄게!
             await interaction.editReply({ content: '❌ 메시지를 청소하는 중에 오류가 발생했습니다. (2주가 지난 메시지는 지울 수 없어요!)' });
             
             setTimeout(async () => {

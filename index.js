@@ -57,20 +57,3 @@ client.on('interactionCreate', async interaction => {
 
 // ⭐ 진짜 토큰을 지우고, 비밀 서랍(.env)에서 안전하게 꺼내오도록 수정했어요!
 client.login(process.env.TOKEN);
-
-
-// =================================================================
-// 🚀 [추가된 코드] 24시간 실시간 업타입을 위한 가짜 웹서버 개통!
-// =================================================================
-const express = require('express');
-const app = express();
-
-// 업타임로봇이나 렌더 서버가 주소로 접속하면 "나 살아있어!" 하고 응답해주는 주소창
-app.get('/', (req, res) => {
-    res.send('Bot is Online!');
-});
-
-// 렌더가 열어주는 포트(번지수)를 자동으로 찾아서 서버를 리스닝(대기) 시키는 장치
-app.listen(process.env.PORT || 10000, () => {
-    console.log('🌐 Uptime 웹 서버가 정상적으로 작동하기 시작했습니다.');
-});

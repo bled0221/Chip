@@ -2,7 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder, ChannelType, PermissionFlagsBits } = 
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('뒷담')
+        .setName('익명')
         .setDescription('당신의 이름을 숨기고 익명으로 메시지를 보냅니다.')
         .addStringOption(option =>
             option.setName('내용')
@@ -14,7 +14,7 @@ module.exports = {
         const guild = interaction.guild; // 명령어가 사용된 디스코드 서버
 
         // 1. 유저에게 비밀 메시지로 먼저 알림을 보내고, 그 메시지를 변수(reply)에 저장
-        const reply = await interaction.reply({ content: '🤫 익명 제보가 안전하게 전송되었습니다!', ephemeral: true });
+        const reply = await interaction.reply({ content: '🤫 익명 메시지가 안전하게 전송되었습니다!', ephemeral: true });
 
         // ⏱️ [핵심 기능] 3초(3000ms) 뒤에 나한테만 보이던 완료 알림을 자동으로 삭제하기
         setTimeout(async () => {
@@ -25,17 +25,17 @@ module.exports = {
             }
         }, 3000); // 3000은 3초를 뜻해! 만약 5초로 하고 싶다면 5000으로 바꾸면 돼.
 
-        // 실시간 채널 목록 fetch (채널 이름 검색과 생성을 'Open Claw-뒷담방'으로 통일했어!)
+        // 실시간 채널 목록 fetch (채널 이름 검색과 생성을 'Open Claw-익명방'으로 통일했어!)
         const channels = await guild.channels.fetch();
-        let targetChannel = channels.find(ch => ch.name === 'open-claw-뒷담방' && ch.type === ChannelType.GuildText);
+        let targetChannel = channels.find(ch => ch.name === 'open-claw-익명방' && ch.type === ChannelType.GuildText);
 
         // 서버 전체를 통틀어 채널이 진짜로 존재하지 않을 때만 딱 한 번만 새로 생성
         if (!targetChannel) {
             try {
                 targetChannel = await guild.channels.create({
-                    name: 'open-claw-뒷담방',
+                    name: 'open-claw-익명방',
                     type: ChannelType.GuildText,
-                    topic: 'Open Claw-뒷담방입니다. 자유롭게 즐겨보세요!',
+                    topic: 'Open Claw-익명방입니다. 자유롭게 즐겨보세요!',
                     permissionOverwrites: [
                         {
                             id: guild.roles.everyone.id,
@@ -56,10 +56,10 @@ module.exports = {
         // 만능 회색(#72767d) 익명 박스(임베드) 꾸미기
         const anonymousEmbed = new EmbedBuilder()
             .setColor('#72767d')
-            .setTitle('익명 뒷담 메시지')
+            .setTitle('익명 메시지')
             .setDescription(`"${content}"`)
             .setTimestamp()
-            .setFooter({ text: '범인은 근처에?' });
+            .setFooter({ text: '서버 관리는 open claw' });
 
         // 최종 전송
         await targetChannel.send({ embeds: [anonymousEmbed] });
