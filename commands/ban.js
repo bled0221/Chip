@@ -20,7 +20,7 @@ module.exports = {
         // [체크 1] 명령어를 쓴 관리자에게 차단 권한이 있는지 확인
         if (!interaction.member.permissions.has(PermissionFlagsBits.BanMembers)) {
             await interaction.reply({ 
-                content: '❌ 당신은 권한이 없습니다! (멤버 차단 권한이 필요합니다)', 
+                content: '❌ 당신은 권한이 없습니다! (멤버 관리 권한이 필요합니다)', 
                 flags: MessageFlags.Ephemeral 
             });
             setTimeout(() => interaction.deleteReply().catch(console.error), 3000);
@@ -31,7 +31,7 @@ module.exports = {
         await interaction.deferReply();
 
         const targetMember = interaction.options.getMember('멤버');
-        const reason = interaction.options.getString('사유') || '지정되지 않음'; 
+        const reason = interaction.options.getString('사유') || '미작성'; 
 
         // [체크 2] 유저가 서버에 없는 경우
         if (!targetMember) {
@@ -42,7 +42,7 @@ module.exports = {
 
         // [체크 3] 차단 대상이 봇 자신(Open Claw)일 경우
         if (targetMember.id === interaction.client.user.id) {
-            await interaction.editReply({ content: '저를 차단할 수는 없습니다! 혹시 제가 뭘 잘못했나요..? 🥺' });
+            await interaction.editReply({ content: '저를 차단할 수는 없습니다! 제가 뭘 잘못했나요..? 🥺' });
             setTimeout(() => interaction.deleteReply().catch(console.error), 4000);
             return;
         }
