@@ -21,11 +21,9 @@ module.exports = {
                 .join('\n\n');
 
             return new EmbedBuilder()
-                .setColor(0x0099FF)
-                // 💡 여기! 타이틀에 서버 개수를 포함했어
+                .setColor(0x72767d) // 적용 완료!
                 .setTitle(`참여 중인 서버 목록 (${guilds.length}개 서버)`)
                 .setDescription(guildList || '참여 중인 서버가 없습니다.')
-                // 💡 풋터에는 페이지 정보만 남겨서 훨씬 깔끔해졌어
                 .setFooter({ text: `페이지 ${page + 1} / ${maxPage + 1}` });
         };
 
