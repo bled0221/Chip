@@ -25,17 +25,17 @@ module.exports = {
             }
         }, 3000); // 3000은 3초를 뜻해! 만약 5초로 하고 싶다면 5000으로 바꾸면 돼.
 
-        // 실시간 채널 목록 fetch (채널 이름 검색과 생성을 'Open Claw-익명방'으로 통일했어!)
+        // 실시간 채널 목록 fetch (채널 이름 검색과 생성을 'Chip-익명방'으로 통일했어!)
         const channels = await guild.channels.fetch();
-        let targetChannel = channels.find(ch => ch.name === 'open-claw-익명방' && ch.type === ChannelType.GuildText);
+        let targetChannel = channels.find(ch => ch.name === 'chip-익명방' && ch.type === ChannelType.GuildText);
 
         // 서버 전체를 통틀어 채널이 진짜로 존재하지 않을 때만 딱 한 번만 새로 생성
         if (!targetChannel) {
             try {
                 targetChannel = await guild.channels.create({
-                    name: 'open-claw-익명방',
+                    name: 'chip-익명방',
                     type: ChannelType.GuildText,
-                    topic: 'Open Claw-익명방입니다. 자유롭게 즐겨보세요!',
+                    topic: 'Chip-익명방입니다. 자유롭게 즐겨보세요!',
                     permissionOverwrites: [
                         {
                             id: guild.roles.everyone.id,
@@ -59,7 +59,7 @@ module.exports = {
             .setTitle('익명 메시지')
             .setDescription(`"${content}"`)
             .setTimestamp()
-            .setFooter({ text: '서버 관리는 open claw' });
+            .setFooter({ text: '서버 관리는 Chip' });
 
         // 최종 전송
         await targetChannel.send({ embeds: [anonymousEmbed] });

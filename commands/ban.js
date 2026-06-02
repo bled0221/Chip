@@ -40,7 +40,7 @@ module.exports = {
             return;
         }
 
-        // [체크 3] 차단 대상이 봇 자신(Open Claw)일 경우
+        // [체크 3] 차단 대상이 봇 자신(Chip)일 경우
         if (targetMember.id === interaction.client.user.id) {
             await interaction.editReply({ content: '저를 차단할 수는 없습니다! 제가 뭘 잘못했나요..? 🥺' });
             setTimeout(() => interaction.deleteReply().catch(console.error), 4000);
@@ -49,7 +49,7 @@ module.exports = {
 
         // [체크 4] 대상이 봇보다 권한이 높아서 차단할 수 없는 경우
         if (!targetMember.bannable) {
-            await interaction.editReply({ content: '❌ Open Claw의 권한이 부족하여 이 멤버를 차단할 수 없습니다. (서버 설정에서 Open Claw의 역할 순위를 더 올려주세요!)' });
+            await interaction.editReply({ content: '❌ Chip의 권한이 부족하여 이 멤버를 차단할 수 없습니다. (서버 설정에서 Chip의 역할 순위를 더 올려주세요!)' });
             setTimeout(() => interaction.deleteReply().catch(console.error), 5000);
             return;
         }

@@ -49,7 +49,7 @@ module.exports = {
 
         // [체크 4] 대상이 봇보다 권한이 높아서 추방할 수 없는 경우
         if (!targetMember.kickable) {
-            await interaction.editReply({ content: '❌ Open Claw의 권한이 부족하여 이 멤버를 추방할 수 없습니다. (서버 설정에서 Open Claw의 역할 순위를 더 올려주세요!)' });
+            await interaction.editReply({ content: '❌ Chip의 권한이 부족하여 이 멤버를 추방할 수 없습니다. (서버 설정에서 Chip의 역할 순위를 더 올려주세요!)' });
             setTimeout(() => interaction.deleteReply().catch(console.error), 5000);
             return;
         }

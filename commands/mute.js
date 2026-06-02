@@ -53,7 +53,7 @@ module.exports = {
 
         // [체크 4] 타임아웃 가능 여부 확인
         if (!targetMember.moderatable) {
-            await interaction.editReply({ content: '❌ Open Claw의 권한이 부족하여 이 멤버를 제한할 수 없습니다. (서버 설정에서 Open Claw의 역할 순위를 더 올려주세요!)' });
+            await interaction.editReply({ content: '❌ Chip의 권한이 부족하여 이 멤버를 제한할 수 없습니다. (서버 설정에서 Chip의 역할 순위를 더 올려주세요!)' });
             setTimeout(() => interaction.deleteReply().catch(console.error), 5000);
             return;
         }
