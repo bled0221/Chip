@@ -4,8 +4,8 @@ const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } =
 module.exports = {
     // 1. 디스코드 슬래시 명령어 설정
     data: new SlashCommandBuilder()
-        .setName('타임아웃')
-        .setDescription('특정 멤버의 채팅과 음성 참여를 일정 시간 동안 제한합니다.')
+        .setName('뮤트')
+        .setDescription('특정 멤버의 채팅과 음성 참여를 일정 시간 동안 제한합니다. (타임아웃)')
         .addUserOption(option => 
             option.setName('멤버')
                 .setDescription('타임아웃할 멤버를 선택하세요.')
@@ -73,7 +73,7 @@ module.exports = {
             const successEmbed = new EmbedBuilder()
                 .setColor('#72767d')
                 .setTitle('타임아웃 완료')
-                .setDescription(`**${targetMember.user.tag}** 님이 ${minutes}분 동안 제한되었습니다.`)
+                .setDescription(`**${targetMember.user.tag}** 님이 ${minutes}분 동안 타임아웃 되었습니다.`)
                 .addFields(
                     { name: '대상', value: `<@${targetMember.id}>`, inline: true },
                     { name: '담당 관리자', value: `<@${interaction.user.id}>`, inline: true },
