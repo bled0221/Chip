@@ -35,7 +35,7 @@ for (const file of commandFiles) {
 // 💡 여기를 수정했어! (Events.ClientReady 사용)
 client.once(Events.ClientReady, (c) => {
     console.log('✅ 모든 명령어가 성공적으로 장착되었습니다!');
-    console.log(`🤖 ${c.user.username} 봇이 성공적으로 실행되었습니다!`); // 이제 재실행하면 'Chip'으로 뜰 거야
+    console.log(`🤖 ${c.user.username} 봇이 성공적으로 실행되었습니다!`); 
 });
 
 client.on('interactionCreate', async interaction => {
