@@ -15,65 +15,65 @@ const client = new Client({
 client.commands = new Collection();
 client.prefixCommands = new Collection();
 
-// 1. 읽어올 폴더 리스트 정의
+// 1. 명령어 폴더 로딩 (commands, dev-commands)
 const folders = ['commands', 'dev-commands']; 
-
 for (const folder of folders) {
     const commandsPath = path.join(__dirname, folder);
-    
-    // 폴더가 존재하는지 확인
     if (!fs.existsSync(commandsPath)) continue; 
 
     const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
-    
     for (const file of commandFiles) {
-        const filePath = path.join(commandsPath, file);
+        const filePath = path.join(__dirname, folder, file); // 수정: 정확한 경로 지정
         const command = require(filePath);
 
-        // 'data' 속성이 있으면 슬래시 커맨드로 등록
         if ('data' in command && 'execute' in command) {
             client.commands.set(command.data.name, command);
-        } 
-        // 'name' 속성이 있고 위 경우가 아니면 접두사 명령어(prefix command)로 등록
-        else if ('name' in command && 'execute' in command) {
+        } else if ('name' in command && 'execute' in command) {
             client.prefixCommands.set(command.name, command);
-        } 
-        else {
-            console.log(`[⚠️ 경고] ${filePath} 파일의 형식을 확인해주세요.`);
         }
     }
 }
 
+// 2. 명령어 사용 로그 저장 함수
+function saveLog(guildId, userId, commandContent) {
+    const timestamp = new Date().toLocaleString();
+    // command-logs.txt 파일에 기록
+    const logEntry = `[${timestamp}] 서버ID: ${guildId} | 유저ID: ${userId} | 명령어: ${commandContent}\n`;
+    fs.appendFileSync('command-logs.txt', logEntry);
+}
+
 client.once(Events.ClientReady, (c) => {
-    console.log('✅ 모든 명령어가 성공적으로 장착되었습니다!');
-    console.log(`🤖 ${c.user.username} 봇이 성공적으로 실행되었습니다!`); 
+    console.log(`✅ ${c.user.username} 봇이 성공적으로 실행되었습니다!`);
 });
 
+// 슬래시 명령어 처리
 client.on('interactionCreate', async interaction => {
     if (!interaction.isChatInputCommand()) return;
-
-    const command = interaction.client.commands.get(interaction.commandName);
+    const command = client.commands.get(interaction.commandName);
     if (!command) return;
 
     try {
         await command.execute(interaction);
     } catch (error) {
         console.error(error);
-        const reply = { content: '명령어를 실행하는 중 오류가 발생했습니다!', ephemeral: true };
-        if (interaction.replied || interaction.deferred) {
-            await interaction.followUp(reply);
-        } else {
-            await interaction.reply(reply);
-        }
     }
 });
 
+// 접두사 명령어 처리 (로그 + 무응답 보안 로직)
 client.on('messageCreate', async message => {
     if (message.author.bot) return;
 
-    // 접두사 명령어 실행 로직
     const command = client.prefixCommands.get(message.content.trim());
     if (command) {
+        // [로그 기록] 모든 시도를 기록합니다.
+        saveLog(message.guild.id, message.author.id, message.content);
+
+        // [개발자 전용 보안 체크] 내가 아니면 '무응답(return)'
+        if (command.developerOnly && message.author.id !== process.env.DEVELOPER_ID) {
+            return; 
+        }
+
+        // [명령어 실행]
         try {
             await command.execute(message);
         } catch (error) {
