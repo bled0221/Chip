@@ -55,10 +55,10 @@ module.exports = {
             // 1. 추방당한 사람에게 보낼 DM 임베드 생성
             const dmEmbed = new EmbedBuilder()
                 .setColor(0x72767d)
-                .setTitle(`[${interaction.guild.name}] 서버 추방 안내`)
+                .setTitle(` [${interaction.guild.name}] 서버 추방 안내 `)
                 .setDescription(`**${interaction.guild.name}** 에서 추방되었음을 알려드립니다.`)
                 .addFields(
-                    { name: '담당 관리자', value: interaction.user.tag, inline: false }, // 담당 관리자를 위로 이동
+                    { name: '담당 관리자', value: `<@${interaction.user.id}>`, inline: true }, // 담당 관리자를 위로 이동
                     { name: '사유', value: reason, inline: false }
                 )
                 .setTimestamp();
