@@ -54,7 +54,7 @@ module.exports = {
                     // 💡 제목에 '실제 서버 닉네임'이 들어가게 됩니다.
                     .setTitle(`${userNickname} 유저 로그`)
                     .setDescription(pageLogs || '기록 없음')
-                    .setColor(0x00aaff)
+                    .setColor(0x72767d)
                     .setFooter({ text: `페이지: ${pageIndex + 1}/${totalPages} | 유저 ID: ${targetUserId}` });
             };
 
