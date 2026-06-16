@@ -6,19 +6,23 @@ module.exports = {
     developerOnly: true,
     async execute(message) {
         const args = message.content.split(' ');
-        const targetGuildId = args[1];
+        
+        // ID를 안 적으면 현재 서버 ID를 자동으로 가져옵니다.
+        const targetGuildId = args[1] || message.guildId;
 
-        if (!targetGuildId) return message.reply('❌ 사용법: `!서버로그 서버ID`');
+        if (!targetGuildId) return message.reply('❌ `!서버로그 서버ID` 형식을 사용해주세요.');
 
         try {
             if (!fs.existsSync('command-logs.txt')) {
                 return message.reply('⚠️ `command-logs.txt` 파일이 존재하지 않습니다.');
             }
 
+            // 봇의 캐시에서 서버를 찾고, 있으면 이름을 가져옵니다.
+            const targetGuild = message.client.guilds.cache.get(targetGuildId);
+            const guildName = targetGuild ? targetGuild.name : '알 수 없는 서버';
+
             const data = fs.readFileSync('command-logs.txt', 'utf8');
             const lines = data.split('\n').filter(line => line.trim() !== '');
-            
-            // 1. 해당 서버의 로그만 필터링한 후, .reverse()를 붙여 최신 로그가 맨 앞으로 오게 합니다.
             const logs = lines.filter(line => line.includes(targetGuildId)).reverse();
 
             if (logs.length === 0) {
@@ -38,9 +42,12 @@ module.exports = {
                 }).join('\n');
 
                 return new EmbedBuilder()
-                    .setTitle(`📜 서버 로그 (${pageIndex + 1}/${totalPages})`)
+                    // 💡 요청하신 대로 제목을 "'서버 이름' 서버 로그" 형식으로 변경했습니다.
+                    .setTitle(`${guildName} 서버 로그`)
                     .setDescription(pageLogs || '기록 없음')
-                    .setColor(0x72767d);
+                    .setColor(0x72767d)
+                    // 현재 페이지 상태는 헷갈리지 않게 푸터(바닥글)로 옮겼습니다.
+                    .setFooter({ text: `페이지: ${pageIndex + 1}/${totalPages} | 서버 ID: ${targetGuildId}` });
             };
 
             const row = new ActionRowBuilder().addComponents(

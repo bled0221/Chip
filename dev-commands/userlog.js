@@ -6,24 +6,27 @@ module.exports = {
     developerOnly: true, // 오직 개발자님만 실행 가능!
     async execute(message) {
         const args = message.content.split(' ');
-        const targetUserId = args[1];
-
-        // 유저 ID를 입력하지 않았을 때 사용법 안내
-        if (!targetUserId) return message.reply('❌ 사용법: `!유저로그 유저ID`');
+        
+        // 💡 유저 ID를 안 적으면 현재 명령어를 친 개발자님의 ID(message.author.id)를 자동으로 가져옵니다.
+        const targetUserId = args[1] || message.author.id;
 
         try {
             if (!fs.existsSync('command-logs.txt')) {
                 return message.reply('⚠️ `command-logs.txt` 파일이 존재하지 않습니다.');
             }
 
+            // 💡 봇의 캐시에서 유저를 찾고, 있으면 이름(username)을 가져옵니다.
+            const targetUser = message.client.users.cache.get(targetUserId);
+            const userName = targetUser ? targetUser.username : '알 수 없는 유저';
+
             const data = fs.readFileSync('command-logs.txt', 'utf8');
             const lines = data.split('\n').filter(line => line.trim() !== '');
             
-            // 💡 1. 전체 로그 중 "유저ID: 입력한ID"가 포함된 라인만 필터링한 후, 최신순(.reverse()) 정렬
+            // 전체 로그 중 "유저ID: 입력한ID"가 포함된 라인만 필터링한 후 최신순 정렬
             const logs = lines.filter(line => line.includes(`유저ID: ${targetUserId}`)).reverse();
 
             if (logs.length === 0) {
-                return message.reply(`📭 해당 유저 ID(<@${targetUserId}>)에 대한 기록을 찾을 수 없습니다.`);
+                return message.reply(`📭 해당 유저[${userName}]에 대한 기록을 찾을 수 없습니다.`);
             }
 
             const pageSize = 5;
@@ -35,14 +38,16 @@ module.exports = {
                 const end = start + pageSize;
                 
                 const pageLogs = logs.slice(start, end).map(line => {
-                    // 유저 ID 부분을 멘션 형태로 변환해서 보기 편하게 만듭니다.
                     return line.replace(/유저ID: (\d+)/g, (match, userId) => `유저ID: <@${userId}>`);
                 }).join('\n');
 
                 return new EmbedBuilder()
-                    .setTitle(`👤 유저 로그 - <@${targetUserId}> (${pageIndex + 1}/${totalPages})`)
+                    // 💡 제목을 "'유저 이름' 유저 로그" 형식으로 변경했습니다. (본문은 그대로 유지)
+                    .setTitle(`${userName} 유저 로그`)
                     .setDescription(pageLogs || '기록 없음')
-                    .setColor(0x00aaff); // 서버 로그와 구분하기 위해 파란색 계열로 설정
+                    .setColor(0x00aaff)
+                    // 페이지 정보와 유저 ID는 바닥글로 내려서 깔끔하게 정리했습니다.
+                    .setFooter({ text: `페이지: ${pageIndex + 1}/${totalPages} | 유저 ID: ${targetUserId}` });
             };
 
             const row = new ActionRowBuilder().addComponents(
