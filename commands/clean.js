@@ -1,5 +1,5 @@
 // commands/clean.js
-const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -12,8 +12,10 @@ module.exports = {
         ),
 
     async execute(interaction) {
+        // 권한 체크
         if (!interaction.member.permissions.has(PermissionFlagsBits.ManageMessages)) {
-            await interaction.reply({ content: '⚠️ 이 명령어를 사용할 권한이 없습니다! (메시지 관리 권한 필요)', ephemeral: true });
+            // 💡 [변경] ephemeral: true 대신 flags: [MessageFlags.Ephemeral] 사용
+            await interaction.reply({ content: '⚠️ 이 명령어를 사용할 권한이 없습니다! (메시지 관리 권한 필요)', flags: [MessageFlags.Ephemeral] });
             
             setTimeout(async () => {
                 try {
@@ -29,11 +31,13 @@ module.exports = {
         const amount = interaction.options.getInteger('개수');
 
         if (amount < 1 || amount > 100) {
-            return interaction.reply({ content: '⚠️ 1부터 100 사이의 숫자를 입력해 주세요!', ephemeral: true });
+            // 💡 [변경] flags: [MessageFlags.Ephemeral] 적용
+            return interaction.reply({ content: '⚠️ 1부터 100 사이의 숫자를 입력해 주세요!', flags: [MessageFlags.Ephemeral] });
         }
 
         try {
-            await interaction.deferReply({ ephemeral: true });
+            // 💡 [변경] deferReply에서도 ephemeral: true 대신 flags를 사용합니다.
+            await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
             
             const deletedMessages = await interaction.channel.bulkDelete(amount, true);
             
