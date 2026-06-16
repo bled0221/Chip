@@ -2,13 +2,14 @@ const fs = require('node:fs');
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } = require('discord.js');
 
 module.exports = {
-    name: '!로그',
-    developerOnly: true,
+    name: '!유저로그',
+    developerOnly: true, // 오직 개발자님만 실행 가능!
     async execute(message) {
         const args = message.content.split(' ');
-        const targetGuildId = args[1];
+        const targetUserId = args[1];
 
-        if (!targetGuildId) return message.reply('❌ 사용법: `!로그 [서버ID]`');
+        // 유저 ID를 입력하지 않았을 때 사용법 안내
+        if (!targetUserId) return message.reply('❌ 사용법: `!유저로그 유저ID`');
 
         try {
             if (!fs.existsSync('command-logs.txt')) {
@@ -18,10 +19,11 @@ module.exports = {
             const data = fs.readFileSync('command-logs.txt', 'utf8');
             const lines = data.split('\n').filter(line => line.trim() !== '');
             
-            const logs = lines.filter(line => line.includes(targetGuildId));
+            // 💡 1. 전체 로그 중 "유저ID: 입력한ID"가 포함된 라인만 필터링한 후, 최신순(.reverse()) 정렬
+            const logs = lines.filter(line => line.includes(`유저ID: ${targetUserId}`)).reverse();
 
             if (logs.length === 0) {
-                return message.reply(`📭 해당 서버 ID(${targetGuildId})에 대한 기록을 찾을 수 없습니다.`);
+                return message.reply(`📭 해당 유저 ID(<@${targetUserId}>)에 대한 기록을 찾을 수 없습니다.`);
             }
 
             const pageSize = 5;
@@ -33,13 +35,14 @@ module.exports = {
                 const end = start + pageSize;
                 
                 const pageLogs = logs.slice(start, end).map(line => {
+                    // 유저 ID 부분을 멘션 형태로 변환해서 보기 편하게 만듭니다.
                     return line.replace(/유저ID: (\d+)/g, (match, userId) => `유저ID: <@${userId}>`);
                 }).join('\n');
 
                 return new EmbedBuilder()
-                    .setTitle(`📜 서버 로그 (${pageIndex + 1}/${totalPages})`)
+                    .setTitle(`👤 유저 로그 - <@${targetUserId}> (${pageIndex + 1}/${totalPages})`)
                     .setDescription(pageLogs || '기록 없음')
-                    .setColor(0x72767d);
+                    .setColor(0x00aaff); // 서버 로그와 구분하기 위해 파란색 계열로 설정
             };
 
             const row = new ActionRowBuilder().addComponents(
