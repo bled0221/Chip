@@ -13,6 +13,7 @@ module.exports = {
         if (!targetGuildId) return message.reply('❌ `!서버로그 서버ID` 형식을 사용해주세요.');
 
         try {
+            // 파일 존재 여부 체크
             if (!fs.existsSync('command-logs.txt')) {
                 return message.reply('⚠️ `command-logs.txt` 파일이 존재하지 않습니다.');
             }
@@ -21,7 +22,9 @@ module.exports = {
             const targetGuild = message.client.guilds.cache.get(targetGuildId);
             const guildName = targetGuild ? targetGuild.name : '알 수 없는 서버';
 
-            const data = fs.readFileSync('command-logs.txt', 'utf8');
+            // 비동기로 로그 파일 읽기 (서버 블로킹 방지)
+            const data = await fs.promises.readFile('command-logs.txt', 'utf8');
+            
             const lines = data.split('\n').filter(line => line.trim() !== '');
             const logs = lines.filter(line => line.includes(targetGuildId)).reverse();
 
@@ -42,27 +45,59 @@ module.exports = {
                 }).join('\n');
 
                 return new EmbedBuilder()
-                    // 💡 요청하신 대로 제목을 "'서버 이름' 서버 로그" 형식으로 변경했습니다.
                     .setTitle(`${guildName} 서버 로그`)
                     .setDescription(pageLogs || '기록 없음')
                     .setColor(0x72767d)
-                    // 현재 페이지 상태는 헷갈리지 않게 푸터(바닥글)로 옮겼습니다.
                     .setFooter({ text: `페이지: ${pageIndex + 1}/${totalPages} | 서버 ID: ${targetGuildId}` });
             };
 
-            const row = new ActionRowBuilder().addComponents(
-                new ButtonBuilder().setCustomId('prev').setLabel('이전').setStyle(ButtonStyle.Primary),
-                new ButtonBuilder().setCustomId('next').setLabel('다음').setStyle(ButtonStyle.Primary)
-            );
+            // 버튼 컴포넌트 생성 함수
+            const getRow = (isDisabled = false) => {
+                const shouldDisable = isDisabled || totalPages <= 1;
+                
+                return new ActionRowBuilder().addComponents(
+                    new ButtonBuilder()
+                        .setCustomId('prev')
+                        .setLabel('이전')
+                        .setStyle(ButtonStyle.Primary)
+                        .setDisabled(shouldDisable),
+                    new ButtonBuilder()
+                        .setCustomId('next')
+                        .setLabel('다음')
+                        .setStyle(ButtonStyle.Primary)
+                        .setDisabled(shouldDisable)
+                );
+            };
 
-            const response = await message.reply({ embeds: [generateEmbed(page)], components: [row] });
+            const response = await message.reply({ 
+                embeds: [generateEmbed(page)], 
+                components: [getRow()] 
+            });
 
-            const collector = response.createMessageComponentCollector({ componentType: ComponentType.Button, time: 60000 });
+            // 🚀 [수정] 제한시간을 300000ms (5분)로 변경 완료!
+            const collector = response.createMessageComponentCollector({ 
+                componentType: ComponentType.Button, 
+                time: 300000 
+            });
+
             collector.on('collect', async i => {
-                if (i.user.id !== message.author.id) return i.reply({ content: '직접 사용하세요!', ephemeral: true });
+                if (i.user.id !== message.author.id) {
+                    return i.reply({ content: '직접 사용하세요!', ephemeral: true });
+                }
+                
                 if (i.customId === 'prev') page = page > 0 ? --page : totalPages - 1;
                 else page = page < totalPages - 1 ? ++page : 0;
-                await i.update({ embeds: [generateEmbed(page)], components: [row] });
+                
+                await i.update({ embeds: [generateEmbed(page)], components: [getRow()] });
+            });
+
+            // 5분이 지나 수집이 끝나면 버튼을 회색으로 잠금
+            collector.on('end', async () => {
+                try {
+                    await response.edit({ components: [getRow(true)] });
+                } catch (e) {
+                    // 메시지가 이미 삭제되었을 때 에러 방지
+                }
             });
 
         } catch (error) {
