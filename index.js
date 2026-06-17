@@ -52,5 +52,20 @@ if (fs.existsSync(eventsPath)) {
         }
     }
 }
+// ==========================================
+// 4. 전역 에러 핸들링 (봇 다운 방지 시스템)
+// ==========================================
+
+// 예기치 못한 비동기 에러(Promise Rejection) 처리
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('⚠️ [비동기 에러 발생] 코드가 올바르게 처리되지 않았습니다:');
+    console.error(reason);
+});
+
+// 잡지 못한 치명적인 시스템 에러(Uncaught Exception) 처리
+process.on('uncaughtException', (error) => {
+    console.error('❌ [치명적 에러 발생] 봇이 꺼지는 것을 방지했습니다:');
+    console.error(error);
+});
 
 client.login(process.env.TOKEN);
