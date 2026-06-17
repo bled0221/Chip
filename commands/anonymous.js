@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, ChannelType, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ChannelType, PermissionFlagsBits, MessageFlags } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -13,8 +13,11 @@ module.exports = {
         const content = interaction.options.getString('내용');
         const guild = interaction.guild; // 명령어가 사용된 디스코드 서버
 
-        // 1. 유저에게 비밀 메시지로 먼저 알림을 보내고, 그 메시지를 변수(reply)에 저장
-        const reply = await interaction.reply({ content: '🤫 익명 메시지가 안전하게 전송되었습니다!', ephemeral: true });
+        // 1. 유저에게 비밀 메시지로 먼저 알림을 보내고, 그 메시지를 변수(reply)에 저장 (최신 문법 적용)
+        const reply = await interaction.reply({ 
+            content: '🤫 익명 메시지가 안전하게 전송되었습니다!', 
+            flags: MessageFlags.Ephemeral 
+        });
 
         // ⏱️ [핵심 기능] 3초(3000ms) 뒤에 나한테만 보이던 완료 알림을 자동으로 삭제하기
         setTimeout(async () => {
@@ -49,7 +52,10 @@ module.exports = {
                 });
             } catch (error) {
                 console.error('채널 생성 중 에러 발생:', error);
-                return interaction.followUp({ content: '❌ 봇에게 채널을 생성할 수 있는 권한(채널 관리하기)이 없습니다.', ephemeral: true });
+                return interaction.followUp({ 
+                    content: '❌ 봇에게 채널을 생성할 수 있는 권한(채널 관리하기)이 없습니다.', 
+                    flags: MessageFlags.Ephemeral 
+                });
             }
         }
 
