@@ -1,5 +1,4 @@
-// commands/choose.js
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 
 module.exports = {
     // 1. 메뉴판 정의 (유저에게 항목들을 입력받을 거야)
@@ -25,7 +24,7 @@ module.exports = {
         if (choices.length < 2) {
             return interaction.reply({ 
                 content: '⚠️ 최소 2개 이상의 항목을 입력해 주세요! (예: `/랜덤 항목: 짜장면 짬뽕`)', 
-                ephemeral: true 
+                flags: MessageFlags.Ephemeral 
             });
         }
 

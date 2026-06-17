@@ -1,4 +1,3 @@
-// commands/ban.js
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 
 module.exports = {
@@ -66,15 +65,12 @@ module.exports = {
                 )
                 .setTimestamp();
 
-            // DM 발송 시도
-            try {
-                await targetMember.send({ embeds: [dmEmbed] });
-            } catch (dmError) {
-                // DM 차단 시 무시
-            }
-
-            // 💡 2. 진짜로 서버에서 유저 차단하기
-            await targetMember.ban({ reason: reason });
+            // 🚀 [최상으로 업그레이드] DM 발송과 진짜 차단 처리를 동시에(병렬) 수행!
+            // 유저가 DM을 닫아두었을 때 에러가 나서 멈추는 걸 방지하기 위해 DM 전송 함수 뒤에 .catch()를 미리 달아줍니다.
+            await Promise.all([
+                targetMember.send({ embeds: [dmEmbed] }).catch(() => { /* DM 차단 시 무시 */ }),
+                targetMember.ban({ reason: reason })
+            ]);
 
             // 💡 3. 서버 채팅방에 보여줄 성공 임베드
             const successEmbed = new EmbedBuilder()

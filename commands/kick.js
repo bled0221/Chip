@@ -1,4 +1,3 @@
-// commands/kick.js
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 
 module.exports = {
@@ -63,15 +62,14 @@ module.exports = {
                 )
                 .setTimestamp();
 
-            // DM 발송 시도
-            try {
-                await targetMember.send({ embeds: [dmEmbed] });
-            } catch (dmError) {
-                console.log(`DM 발송 실패: ${targetMember.user.tag}`);
-            }
-
-            // 2. 추방 실행
-            await targetMember.kick(reason);
+            // 🚀 [최상으로 업그레이드] DM 발송과 진짜 추방 처리를 동시에(병렬) 수행!
+            // 유저가 DM을 차단(비공개)해 두었을 때 봇이 멈추는 것을 막기 위해 .catch()를 내부에 연결해 줍니다.
+            await Promise.all([
+                targetMember.send({ embeds: [dmEmbed] }).catch(() => {
+                    console.log(`DM 발송 실패(차단됨): ${targetMember.user.tag}`);
+                }),
+                targetMember.kick(reason)
+            ]);
 
             // 3. 서버 채팅방에 보여줄 성공 임베드 생성
             const successEmbed = new EmbedBuilder()

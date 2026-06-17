@@ -1,4 +1,3 @@
-// commands/mute.js
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 
 module.exports = {
@@ -25,7 +24,7 @@ module.exports = {
         if (!interaction.member.permissions.has(PermissionFlagsBits.ModerateMembers)) {
             await interaction.reply({ 
                 content: '❌ 당신은 권한이 없습니다! (멤버 관리 권한이 필요합니다)', 
-                flags: [MessageFlags.Ephemeral] // 최신 배열 형식으로 수정 완료
+                flags: [MessageFlags.Ephemeral]
             });
             setTimeout(() => interaction.deleteReply().catch(console.error), 3000);
             return;
@@ -66,10 +65,10 @@ module.exports = {
         }
 
         try {
-            // 💡 타임아웃 실행 (밀리초 단위 변환)
+            // 💡 [최적화] 불필요한 DM 과정을 완전히 생략하고 바로 타임아웃 찌르기!
             await targetMember.timeout(minutes * 60 * 1000, reason);
 
-            // 💡 성공 임베드 (색상을 숫자 형태 0x72767d로 수정)
+            // 💡 모두가 볼 수 있는 성공 임베드 전송 (당사자도 확인 가능)
             const successEmbed = new EmbedBuilder()
                 .setColor(0x72767d)
                 .setTitle('타임아웃 완료')

@@ -1,4 +1,3 @@
-// commands/userinfo.js
 const { SlashCommandBuilder, EmbedBuilder, time } = require('discord.js');
 
 module.exports = {
@@ -45,23 +44,34 @@ module.exports = {
         const joinedDiscordDate = time(targetUser.createdAt, 'F');
         const joinedServerDate = time(member.joinedAt, 'F');
 
-        // 🎖️ [역할 목록 조립] @everyone까지 완벽하게 배지 모양으로 통일
-        // 1. @everyone을 제외한 일반 역할들을 배지 형태로 먼저 모읍니다.
-        const customRoles = member.roles.cache
+        // 🎖️ [역할 목록 조립] 높은 역할 순 정렬 + 글자 수 초과 방어 코드 적용
+        // 1. @everyone을 제외하고 높은 순서(position)대로 정렬(sort)합니다.
+        const sortedRoles = member.roles.cache
             .filter(role => role.name !== '@everyone')
+            .sort((a, b) => b.position - a.position);
+
+        // 2. 역할이 너무 많으면 임베드가 터지므로 최대 15개까지만 표기하고 나머지는 생략 처리합니다.
+        const maxDisplayRoles = 15;
+        const totalCustomRolesCount = sortedRoles.size;
+        
+        let customRolesDisplay = sortedRoles
+            .first(maxDisplayRoles) // 상위 15개만 자르기
             .map(role => `<@&${role.id}>`)
             .join(' ');
 
-        // 2. 디스코드에서 @everyone 역할의 ID는 '서버 ID'와 같습니다.
-        // 서버 ID를 이용해 똑같은 배지 형태(<@&서버ID>)로 만들어 줍니다.
+        if (totalCustomRolesCount > maxDisplayRoles) {
+            customRolesDisplay += ` \`외 ${totalCustomRolesCount - maxDisplayRoles}개\``;
+        }
+
+        // 3. 디스코드에서 @everyone 역할의 ID는 '서버 ID'와 같습니다.
         const everyoneBadge = `<@&${interaction.guild.id}>`;
 
-        // 3. 다른 역할이 있다면 배지 뒤에 나란히 붙이고, 없다면 @everyone 배지만 단독 출력합니다.
-        const finalRoles = customRoles ? `${customRoles} ${everyoneBadge}` : everyoneBadge;
+        // 4. 최종 역할 텍스트 결합
+        const finalRoles = customRolesDisplay ? `${customRolesDisplay} ${everyoneBadge}` : everyoneBadge;
 
         // 💡 [최종 레이아웃 고정] 작은 상단 프로필 + 촘촘한 간격 + 배지 모양 통일
         const userEmbed = new EmbedBuilder()
-            .setColor(0x72767d) // 💡 문자열 '#72767d'를 다른 파일들과 같이 숫자형 0x72767d로 통일하여 교체
+            .setColor(0x72767d) 
             .setAuthor({ 
                 name: displayName, 
                 iconURL: targetUser.displayAvatarURL({ dynamic: true, size: 128 }) 
