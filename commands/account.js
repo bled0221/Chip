@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -19,12 +19,14 @@ module.exports = {
             if (user) {
                 // 이미 데이터가 있다면 중복 지급 차단!
                 const embed = new EmbedBuilder()
-                    .setColor(0xff0000)
-                    .setTitle('❌ 계좌 개설 실패')
+                    .setColor(0x72767d)
+                    .setTitle('계좌 개설 실패')
                     .setDescription(`이미 계좌를 소유하고 계십니다!\n현재 잔액: **${user.money.toLocaleString()}칩**`)
-                    .setTimestamp();
                 
-                return await interaction.editReply({ embeds: [embed] });
+                // 나만 보이게(Ephemeral) 수정 후 5초 뒤 삭제
+                const reply = await interaction.editReply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+                setTimeout(() => reply.delete().catch(() => {}), 5000);
+                return;
             }
 
             // 2. 가입되지 않은 신규 유저라면 DB에 새로 데이터 삽입 (INSERT)
@@ -37,13 +39,18 @@ module.exports = {
                 .setColor(0x72767d)
                 .setTitle('계좌 개설 완료!')
                 .setDescription(`기본 칩 **${initialMoney.toLocaleString()}칩**이 지급되었습니다.`)
-                .setFooter({ text: '이제 더 많은 칩을 벌어보세요!' })
+                .setFooter({ text: '이제 더 많은 칩을 벌어보세요!' });
 
             await interaction.editReply({ embeds: [embed] });
 
         } catch (error) {
             console.error(error);
-            await interaction.editReply({ content: '⚠️ DB 처리 중 오류가 발생했습니다: ' + error.message });
+            // 오류 발생 시 나만 보이게(Ephemeral) 처리 후 3초 뒤 삭제
+            const reply = await interaction.editReply({ 
+                content: '⚠️ DB 처리 중 오류가 발생했습니다: ' + error.message,
+                flags: MessageFlags.Ephemeral 
+            });
+            setTimeout(() => reply.delete().catch(() => {}), 3000);
         }
     }
 };
