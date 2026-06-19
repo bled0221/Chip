@@ -51,7 +51,6 @@ module.exports = {
                 .setColor(0x72767d)
                 .setTitle('칩 획득!')
                 .setDescription(`${botMention}의 돈통에서 몰래 칩을 꺼냈습니다!\n오늘의 보상 **2,000 칩**이 지급되었습니다.`)
-                .setTimestamp();
 
             await interaction.editReply({ embeds: [embed] });
 
