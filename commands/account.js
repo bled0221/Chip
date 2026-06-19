@@ -8,7 +8,7 @@ module.exports = {
     async execute(interaction) {
         const db = interaction.client.db; // index.js에서 연동해둔 DB 가져오기
         const userId = interaction.user.id;
-        const initialMoney = 50000; // 초기 지급금 (만 원)
+        const initialMoney = 10000; // 초기 지급금 (만 원)
 
         await interaction.deferReply(); // DB 연산 시간 동안 봇이 멈춘 것처럼 보이지 않게 가드
 
