@@ -60,7 +60,6 @@ module.exports = {
                     { name: '담당 관리자', value: `<@${interaction.user.id}>`, inline: true }, // 담당 관리자를 위로 이동
                     { name: '사유', value: reason, inline: false }
                 )
-                .setTimestamp();
 
             // 🚀 [최상으로 업그레이드] DM 발송과 진짜 추방 처리를 동시에(병렬) 수행!
             // 유저가 DM을 차단(비공개)해 두었을 때 봇이 멈추는 것을 막기 위해 .catch()를 내부에 연결해 줍니다.
@@ -81,7 +80,6 @@ module.exports = {
                     { name: '담당 관리자', value: `<@${interaction.user.id}>`, inline: true },
                     { name: '사유', value: reason, inline: false }
                 )
-                .setTimestamp();
 
             await interaction.editReply({ embeds: [successEmbed] });
 

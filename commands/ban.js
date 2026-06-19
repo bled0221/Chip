@@ -63,7 +63,6 @@ module.exports = {
                     { name: '사유', value: reason, inline: false },
                     { name: '담당 관리자', value: `${interaction.user.tag} (${interaction.user.id})`, inline: false }
                 )
-                .setTimestamp();
 
             // 🚀 [최상으로 업그레이드] DM 발송과 진짜 차단 처리를 동시에(병렬) 수행!
             // 유저가 DM을 닫아두었을 때 에러가 나서 멈추는 걸 방지하기 위해 DM 전송 함수 뒤에 .catch()를 미리 달아줍니다.
@@ -82,7 +81,6 @@ module.exports = {
                     { name: '담당 관리자', value: `<@${interaction.user.id}>`, inline: true },
                     { name: '사유', value: reason, inline: false }
                 )
-                .setTimestamp();
 
             await interaction.editReply({ content: '', embeds: [successEmbed] });
 

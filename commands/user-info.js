@@ -97,7 +97,6 @@ module.exports = {
                     iconURL: targetUser.displayAvatarURL({ dynamic: true, size: 128 }) 
                 })
                 .setDescription(embedDescription)
-                .setTimestamp();
 
             // 🚀 deferReply 상태이므로 editReply로 최종 전송
             await interaction.editReply({ embeds: [userEmbed] });

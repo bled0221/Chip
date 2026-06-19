@@ -78,7 +78,6 @@ module.exports = {
                     { name: '담당 관리자', value: `<@${interaction.user.id}>`, inline: true },
                     { name: '사유', value: reason, inline: false }
                 )
-                .setTimestamp();
 
             await interaction.editReply({ content: '', embeds: [successEmbed] });
 

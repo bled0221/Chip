@@ -38,7 +38,6 @@ module.exports = {
                 .setTitle('계좌 개설 완료!')
                 .setDescription(`기본 칩 **${initialMoney.toLocaleString()}칩**이 지급되었습니다.`)
                 .setFooter({ text: '이제 더 많은 칩을 벌어보세요!' })
-                .setTimestamp();
 
             await interaction.editReply({ embeds: [embed] });
 

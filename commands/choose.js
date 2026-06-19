@@ -33,7 +33,7 @@ module.exports = {
 
         // 이 결과는 친구들도 다 같이 봐야 하니까 ephemeral 옵션 없이 모두에게 공개!
         await interaction.reply({ 
-            content: `**Chip**의 선택은 바로... \n\n**${picked}** 입니다!` 
+            content: `**칩**의 선택은 바로... \n\n**${picked}** 입니다!` 
         });
     },
-};
+}; 칩칩

@@ -32,15 +32,15 @@ module.exports = {
         }, 3000); // 3000은 3초를 뜻해! 만약 5초로 하고 싶다면 5000으로 바꾸면 돼.
 
         // 가져온 채널 목록에서 바로 검색 (Promise.all 덕분에 이미 channels 데이터가 완성되어 있습니다)
-        let targetChannel = channels.find(ch => ch.name === 'chip-익명방' && ch.type === ChannelType.GuildText);
+        let targetChannel = channels.find(ch => ch.name === '칩-익명방' && ch.type === ChannelType.GuildText);
 
         // 서버 전체를 통틀어 채널이 진짜로 존재하지 않을 때만 딱 한 번만 새로 생성 (순서가 중요하므로 기존 await 유지)
         if (!targetChannel) {
             try {
                 targetChannel = await guild.channels.create({
-                    name: 'chip-익명방',
+                    name: '칩-익명방',
                     type: ChannelType.GuildText,
-                    topic: 'Chip-익명방입니다. 자유롭게 즐겨보세요!',
+                    topic: '칩-익명방입니다. 자유롭게 즐겨보세요!',
                     permissionOverwrites: [
                         {
                             id: guild.roles.everyone.id,
@@ -67,7 +67,6 @@ module.exports = {
             .setTitle('익명 메시지')
             .setDescription(`"${content}"`)
             .setTimestamp()
-            .setFooter({ text: '서버 관리는 Chip' });
 
         // 최종 전송 (채널이 완벽히 준비된 후 가야 하므로 기존 await 유지)
         await targetChannel.send({ embeds: [anonymousEmbed] });

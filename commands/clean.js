@@ -39,7 +39,7 @@ module.exports = {
             ]);
             
             // 위의 두 작업이 모두 끝나면, 진짜로 지워진 개수(.size)를 안전하게 가져와서 최종 완료 문구를 띄웁니다!
-            await interaction.editReply({ content: `✅ 성공적으로 ${deletedMessages.size}개의 메시지를 청소했습니다!` });
+            await interaction.editReply({ content: `성공적으로 ${deletedMessages.size}개의 메시지를 청소했습니다!` });
 
             setTimeout(async () => {
                 try { await interaction.deleteReply(); } catch (e) { console.error(e); }
