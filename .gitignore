@@ -1,3 +1,4 @@
 node_modules/
 .env
 command-logs.txt
+database.db
