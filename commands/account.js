@@ -3,7 +3,7 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('계좌')
-        .setDescription('계좌를 처음 개설하고 시드머니를 받습니다.'),
+        .setDescription('계좌를 처음 개설하고 기본 칩을 받습니다.'),
     
     async execute(interaction) {
         const db = interaction.client.db; // index.js에서 연동해둔 DB 가져오기
@@ -21,7 +21,7 @@ module.exports = {
                 const embed = new EmbedBuilder()
                     .setColor(0xff0000)
                     .setTitle('❌ 계좌 개설 실패')
-                    .setDescription(`이미 계좌를 소유하고 계십니다!\n현재 잔액: **${user.money.toLocaleString()}원**`)
+                    .setDescription(`이미 계좌를 소유하고 계십니다!\n현재 잔액: **${user.money.toLocaleString()}칩**`)
                     .setTimestamp();
                 
                 return await interaction.editReply({ embeds: [embed] });
@@ -36,7 +36,7 @@ module.exports = {
             const embed = new EmbedBuilder()
                 .setColor(0x72767d)
                 .setTitle('계좌 개설 완료!')
-                .setDescription(`축하합니다! 성공적으로 계좌가 만들어졌습니다.\n기본 시드머니 **${initialMoney.toLocaleString()}원**이 지급되었습니다.`)
+                .setDescription(`기본 칩 **${initialMoney.toLocaleString()}칩**이 지급되었습니다.`)
                 .setFooter({ text: '이제 더 많은 돈을 벌어보세요!' })
                 .setTimestamp();
 
