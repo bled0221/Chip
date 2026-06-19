@@ -36,4 +36,4 @@ module.exports = {
             content: `**칩**의 선택은 바로... \n\n**${picked}** 입니다!` 
         });
     },
-}; 칩칩
+}; 
