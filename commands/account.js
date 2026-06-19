@@ -20,14 +20,12 @@ module.exports = {
                 // 이미 데이터가 있다면 중복 지급 차단!
                 const embed = new EmbedBuilder()
                     .setColor(0x72767d)
-                    .setTitle('계좌 개설 실패')
+                    .setTitle('계좌 개설 실패!')
                     .setDescription(`이미 계좌를 소유하고 계십니다!\n현재 잔액: **${user.money.toLocaleString()}칩**`)
-                
-                // 나만 보이게(Ephemeral) 수정 후 5초 뒤 삭제
-                const reply = await interaction.editReply({ embeds: [embed], flags: MessageFlags.Ephemeral });
-                setTimeout(() => reply.delete().catch(() => {}), 5000);
-                return;
+   
+                return;await interaction.editReply({ embeds: [embed] });
             }
+            
 
             // 2. 가입되지 않은 신규 유저라면 DB에 새로 데이터 삽입 (INSERT)
             await db.run(

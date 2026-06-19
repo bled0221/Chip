@@ -52,12 +52,8 @@ module.exports = {
                     .setTitle('칩 획득 실패!')
                     .setDescription(`돈통이 굳게 닫혀있습니다.\n**${hours}시간 ${minutes}분** 뒤에 다시 시도해주세요!`);
 
-                const reply = await interaction.editReply({ 
-                    embeds: [embed], 
-                    flags: MessageFlags.Ephemeral 
-                });
-                setTimeout(() => reply.delete().catch(() => {}), 5000);
-                return;
+                // 💡 flags 옵션을 제거하여 모두에게 공개됩니다.
+                return await interaction.editReply({ embeds: [embed] });
             }
 
             // 3. 보상 지급 및 DB 업데이트
