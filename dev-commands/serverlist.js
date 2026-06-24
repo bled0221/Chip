@@ -1,7 +1,7 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, MessageFlags } = require('discord.js');
 
 module.exports = {
-    name: '!서버목록',
+    name: '!서버목록', // ◀ 프리픽스 형식 그대로 유지
     developerOnly: true,
     async execute(message) {
         const developerID = process.env.DEVELOPER_ID;
@@ -11,7 +11,6 @@ module.exports = {
         const itemsPerPage = 10;
         let page = 0;
         
-        // 💡 [안전장치] 서버가 0개일 때 maxPage가 음수(-1)가 되는 것을 방지
         const maxPage = Math.max(0, Math.ceil(guilds.length / itemsPerPage) - 1);
 
         const getEmbed = (page) => {
@@ -33,7 +32,6 @@ module.exports = {
                 .setFooter({ text: `페이지 ${page + 1} / ${maxPage + 1}` });
         };
 
-        // 💡 버튼을 만들어주는 함수 (종료되었을 때 모든 버튼을 비활성화하는 옵션 추가)
         const getRow = (page, isDisabled = false) => {
             return new ActionRowBuilder().addComponents(
                 new ButtonBuilder()
@@ -49,12 +47,13 @@ module.exports = {
             );
         };
 
+        // 💡 [핵심] flags를 사용하여 프리픽스 명령어에서도Ephemeral(나에게만 보임) 적용
         const response = await message.reply({ 
             embeds: [getEmbed(page)], 
-            components: [getRow(page)] 
+            components: [getRow(page)],
+            flags: [MessageFlags.Ephemeral] // 또는 flags: [1 << 6]
         });
 
-        // 5분 동안 버튼 신호 수집
         const collector = response.createMessageComponentCollector({ 
             componentType: ComponentType.Button, 
             time: 300000 
@@ -62,22 +61,21 @@ module.exports = {
 
         collector.on('collect', async i => {
             if (i.user.id !== developerID) {
-                return i.reply({ content: '개발자만 제어할 수 있습니다.', ephemeral: true });
+                return i.reply({ content: '개발자만 제어할 수 있습니다.', flags: [MessageFlags.Ephemeral] });
             }
 
             if (i.customId === 'prev') page--;
             else if (i.customId === 'next') page++;
 
+            // ephemeral 메시지 내부의 버튼이므로 i.update로 바로 갱신 가능합니다.
             await i.update({ embeds: [getEmbed(page)], components: [getRow(page)] });
         });
 
-        // 🚀 [최상으로 업그레이드] 5분이 지나 컬렉터가 다 닫혔을 때 실행되는 코드
         collector.on('end', async () => {
             try {
-                // 화면에 남아있는 버튼들을 모두 회색 비활성화 상태로 바꾸어 오류를 원천 차단합니다.
                 await response.edit({ components: [getRow(page, true)] });
             } catch (error) {
-                // 메시지가 이미 지워졌을 때 생길 에러 무시
+                // 에러 무시
             }
         });
     },
