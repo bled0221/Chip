@@ -6,11 +6,11 @@ module.exports = {
         .setDescription('계좌를 처음 개설하고 기본 칩을 받습니다.'),
     
     async execute(interaction) {
-        const db = interaction.client.db; // index.js에서 연동해둔 DB 가져오기
+        const db = interaction.client.db; 
         const userId = interaction.user.id;
-        const initialMoney = 10000; // 초기 지급금 (만 원)
+        const initialMoney = 10000; 
 
-        await interaction.deferReply(); // DB 연산 시간 동안 봇이 멈춘 것처럼 보이지 않게 가드
+        await interaction.deferReply(); 
 
         try {
             // 1. 이미 가입된 유저인지 DB에서 조회
@@ -21,9 +21,11 @@ module.exports = {
                 const embed = new EmbedBuilder()
                     .setColor(0x72767d)
                     .setTitle('계좌 개설 실패!')
-                    .setDescription(`이미 계좌를 소유하고 계십니다!\n현재 잔액: **${user.money.toLocaleString()}칩**`)
+                    .setDescription(`이미 계좌를 소유하고 계십니다!\n현재 잔액: **${user.money.toLocaleString()}칩**`);
    
-                return;await interaction.editReply({ embeds: [embed] });
+                // 수정 완료: 답변을 먼저 보내고 나서 return으로 종료해야 해!
+                await interaction.editReply({ embeds: [embed] });
+                return; 
             }
             
 
@@ -43,7 +45,6 @@ module.exports = {
 
         } catch (error) {
             console.error(error);
-            // 오류 발생 시 나만 보이게(Ephemeral) 처리 후 3초 뒤 삭제
             const reply = await interaction.editReply({ 
                 content: '⚠️ DB 처리 중 오류가 발생했습니다: ' + error.message,
                 flags: MessageFlags.Ephemeral 
